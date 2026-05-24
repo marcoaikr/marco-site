@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>마르코 MVP — 파일 인덱스</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+--bg:#09090b;--bg2:#111113;--bg3:#18181b;
+--border:#27272a;--border2:#3f3f46;
+--text:#fafafa;--text2:#a1a1aa;--text3:#71717a;
+--purple:#8b5cf6;--purple-dim:#1e1b4b;
+--green:#22c55e;--yellow:#fbbf24;
+}
+body{background:var(--bg);color:var(--text);font-family:'Noto Sans KR',sans-serif;font-size:15px;line-height:1.6;-webkit-font-smoothing:antialiased;padding:0;min-height:100vh}
+
+/* HEADER */
+.header{background:var(--bg2);border-bottom:1px solid var(--border);padding:16px 32px;display:flex;align-items:center;justify-content:space-between}
+.header-right{font-size:12px;color:var(--text3)}
+.version-badge{display:inline-block;background:rgba(139,92,246,.15);border:1px solid rgba(139,92,246,.3);color:#a78bfa;font-size:10px;font-weight:700;padding:2px 8px;border-radius:99px;letter-spacing:.04em;margin-left:8px}
+
+/* MAIN */
+.main{max-width:900px;margin:0 auto;padding:40px 24px}
+
+/* SECTION */
+.section-title{font-size:11px;font-weight:700;color:var(--text3);letter-spacing:.12em;text-transform:uppercase;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid var(--border)}
+
+/* FILE CARDS */
+.cards{display:flex;flex-direction:column;gap:8px;margin-bottom:40px}
+.card{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:18px 20px;display:grid;grid-template-columns:auto 1fr auto;gap:16px;align-items:center;text-decoration:none;color:inherit;transition:border-color .2s,background .2s;cursor:pointer}
+.card:hover{border-color:var(--border2);background:var(--bg3)}
+.card.primary{border-color:rgba(139,92,246,.3);background:rgba(139,92,246,.03)}
+.card.primary:hover{border-color:var(--purple);background:rgba(139,92,246,.06)}
+.card-icon{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+.card-icon.purple{background:var(--purple-dim);border:1px solid rgba(139,92,246,.3)}
+.card-icon.green{background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.25)}
+.card-icon.yellow{background:rgba(251,191,36,.1);border:1px solid rgba(251,191,36,.25)}
+.card-icon.gray{background:var(--bg3);border:1px solid var(--border2)}
+.card-info{min-width:0}
+.card-name{font-size:15px;font-weight:600;margin-bottom:3px;word-break:keep-all}
+.card-desc{font-size:12px;color:var(--text2);word-break:keep-all;line-height:1.5}
+.card-file{font-size:10px;color:var(--text3);font-family:'JetBrains Mono',monospace;margin-top:4px}
+.card-right{display:flex;flex-direction:column;align-items:flex-end;gap:6px;flex-shrink:0}
+.card-tag{font-size:10px;font-weight:700;padding:2px 8px;border-radius:99px;white-space:nowrap}
+.tag-latest{background:rgba(34,197,94,.12);color:var(--green);border:1px solid rgba(34,197,94,.25)}
+.tag-ref{background:rgba(251,191,36,.1);color:var(--yellow);border:1px solid rgba(251,191,36,.2)}
+.tag-tool{background:rgba(139,92,246,.12);color:#a78bfa;border:1px solid rgba(139,92,246,.25)}
+.open-btn{display:inline-flex;align-items:center;gap:4px;font-size:12px;font-weight:600;color:var(--purple);white-space:nowrap}
+.open-btn::after{content:'→'}
+
+/* CHECK ITEMS */
+.checklist{display:flex;flex-direction:column;gap:6px;margin-bottom:40px}
+.check-item{display:flex;align-items:flex-start;gap:10px;padding:10px 14px;background:var(--bg2);border:1px solid var(--border);border-radius:8px;font-size:13px;color:var(--text2)}
+.check-item input[type=checkbox]{width:16px;height:16px;accent-color:var(--purple);flex-shrink:0;margin-top:2px;cursor:pointer}
+.check-item label{cursor:pointer;line-height:1.5;word-break:keep-all}
+.check-item input:checked + label{color:var(--text3);text-decoration:line-through}
+
+/* LINKS */
+.links-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:40px}
+.link-card{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:14px 16px;text-decoration:none;color:inherit;transition:border-color .2s;display:flex;flex-direction:column;gap:4px}
+.link-card:hover{border-color:var(--purple)}
+.link-card-label{font-size:10px;font-weight:700;color:var(--text3);letter-spacing:.08em;text-transform:uppercase}
+.link-card-url{font-size:12px;color:var(--purple);font-family:'JetBrains Mono',monospace;word-break:break-all}
+.link-card-desc{font-size:12px;color:var(--text2)}
+
+/* PROGRESS */
+.progress-wrap{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:40px}
+.progress-title{font-size:13px;font-weight:600;margin-bottom:14px}
+.progress-items{display:flex;flex-direction:column;gap:8px}
+.progress-item{display:flex;align-items:center;gap:10px;font-size:13px}
+.progress-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.done{background:var(--green)}
+.pending{background:var(--border2)}
+.progress-item.done-item{color:var(--text2)}
+.progress-item.pending-item{color:var(--text3)}
+
+@media(max-width:600px){
+  .main{padding:24px 14px}
+  .card{grid-template-columns:auto 1fr;}
+  .card-right{display:none}
+  .links-grid{grid-template-columns:1fr}
+  .header{padding:14px 16px}
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div style="display:flex;align-items:center;gap:10px">
+    <img src="data:image/png;base64,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" alt="MARCO" style="height:28px;width:auto">
+    <span class="version-badge">Beta v0.1</span>
+  </div>
+  <span class="header-right">MVP 파일 인덱스 · 2025년 5월</span>
+</div>
+
+<div class="main">
+
+  <!-- 핵심 파일 -->
+  <p class="section-title">핵심 파일 — 사용자에게 보이는 것</p>
+  <div class="cards">
+
+    <a class="card primary" href="marco_landing_v6.html" target="_blank">
+      <div class="card-icon purple">🏠</div>
+      <div class="card-info">
+        <p class="card-name">랜딩페이지</p>
+        <p class="card-desc">서비스 소개 · 가격 · CTA · 업데이트 로그 · FAQ 포함. 모든 버튼 링크 연결 완료.</p>
+        <p class="card-file">marco_landing_v6.html</p>
+      </div>
+      <div class="card-right">
+        <span class="card-tag tag-latest">최신</span>
+        <span class="open-btn">열기</span>
+      </div>
+    </a>
+
+    <a class="card primary" href="marco_free_report_v2.html" target="_blank">
+      <div class="card-icon purple">📊</div>
+      <div class="card-info">
+        <p class="card-name">샘플 리포트 페이지</p>
+        <p class="card-desc">FC·TG·TR·MS·RT 점수 · 채널 실측 · 업종 비교 · 키워드 분석 · 미션 3개 · 로드맵 · Pro 블러 섹션 포함.</p>
+        <p class="card-file">marco_free_report_v2.html</p>
+      </div>
+      <div class="card-right">
+        <span class="card-tag tag-latest">최신</span>
+        <span class="open-btn">열기</span>
+      </div>
+    </a>
+
+    <a class="card primary" href="marco_free_report_v2.html" target="_blank">
+      <div class="card-icon green">📋</div>
+      <div class="card-info">
+        <p class="card-name">무료 진단 리포트 템플릿</p>
+        <p class="card-desc">실제 이메일로 발송할 무료 리포트. FC·TG·TR·MS·RT 점수 · 채널 실측 · 업종 비교 · 키워드 · 미션 3개 · 로드맵 포함.</p>
+        <p class="card-file">marco_free_report_v2.html</p>
+      </div>
+      <div class="card-right">
+        <span class="card-tag tag-latest">최신</span>
+        <span class="open-btn">열기</span>
+      </div>
+    </a>
+
+    <a class="card primary" href="marco_chat.html" target="_blank">
+      <div class="card-icon purple">💬</div>
+      <div class="card-info">
+        <p class="card-name">마르코 챗봇 (Pro 전용)</p>
+        <p class="card-desc">유료 사용자 전용 AI 챗봇. Claude API 연동. 서비스 이용 관련 질문 답변. 작동 원리·보안 등 민감 주제 자동 거절.</p>
+        <p class="card-file">marco_chat.html</p>
+      </div>
+      <div class="card-right">
+        <span class="card-tag tag-tool">Pro 전용</span>
+        <span class="open-btn">열기</span>
+      </div>
+    </a>
+
+  </div>
+
+  <!-- Fillout 폼 링크 -->
+  <p class="section-title">Fillout 폼 — 사용자 입력</p>
+  <div class="links-grid">
+    <a class="link-card" href="https://jztyy3xlul.zite.so" target="_blank">
+      <span class="link-card-label">무료 진단 폼</span>
+      <span class="link-card-url">jztyy3xlul.zite.so</span>
+      <span class="link-card-desc">17개 질문 · 에어테이블 연동 · 무료/건당 사용자</span>
+    </a>
+    <a class="link-card" href="https://dqiwwrokap.zite.so" target="_blank">
+      <span class="link-card-label">Pro 등록 폼</span>
+      <span class="link-card-url">dqiwwrokap.zite.so</span>
+      <span class="link-card-desc">20개 질문 · 담당자 + 클라이언트 1곳 · Pro 전용</span>
+    </a>
+    <a class="link-card" href="https://kdzglamayn.zite.so" target="_blank">
+      <span class="link-card-label">유료 회원가입 폼</span>
+      <span class="link-card-url">kdzglamayn.zite.so</span>
+      <span class="link-card-desc">4개 질문 · 입금 안내 · 건당/Pro월정액/Pro연간</span>
+    </a>
+  </div>
+
+  <!-- 체크리스트 -->
+  <p class="section-title">테스트 체크리스트</p>
+  <div class="checklist">
+    <div class="check-item">
+      <input type="checkbox" id="c1">
+      <label for="c1">랜딩페이지 — 전체 섹션 스크롤하며 내용 확인</label>
+    </div>
+    <div class="check-item">
+      <input type="checkbox" id="c2">
+      <label for="c2">랜딩페이지 — "무료 진단 신청하기" 버튼 클릭 시 무료 폼으로 이동</label>
+    </div>
+    <div class="check-item">
+      <input type="checkbox" id="c3">
+      <label for="c3">랜딩페이지 — "건당 시작하기" 버튼 클릭 시 유료 회원가입 폼으로 이동</label>
+    </div>
+    <div class="check-item">
+      <input type="checkbox" id="c4">
+      <label for="c4">랜딩페이지 — "Pro 시작하기" 버튼 클릭 시 유료 회원가입 폼으로 이동</label>
+    </div>
+    <div class="check-item">
+      <input type="checkbox" id="c5">
+      <label for="c5">랜딩페이지 — "연간으로 시작하기" 버튼 클릭 시 유료 회원가입 폼으로 이동</label>
+    </div>
+    <div class="check-item">
+      <input type="checkbox" id="c6">
+      <label for="c6">랜딩페이지 — Beta v0.1 배지 네비게이션에 표시됨</label>
+    </div>
+    <div class="check-item">
+      <input type="checkbox" id="c7">
+      <label for="c7">무료 리포트 — FC·TG·TR·MS·RT 점수가 100점 만점 기준으로 표시됨</label>
+    </div>
+    <div class="check-item">
+      <input type="checkbox" id="c8">
+      <label for="c8">무료 리포트 — Pro 전용 블러 섹션과 "Pro로 전환하기" 버튼 표시됨</label>
+    </div>
+    <div class="check-item">
+      <input type="checkbox" id="c9">
+      <label for="c9">무료 리포트 — 7개 섹션 모두 정상 표시 (점수·채널·업종비교·키워드·병목·미션·로드맵)</label>
+    </div>
+    <div class="check-item">
+      <input type="checkbox" id="c10">
+      <label for="c10">무료 리포트 — 총점 53/100, 등급 바 정상 표시됨</label>
+    </div>
+    <div class="check-item">
+      <input type="checkbox" id="c11">
+      <label for="c11">챗봇 — 마르코 초기 인사 메시지 표시됨</label>
+    </div>
+    <div class="check-item">
+      <input type="checkbox" id="c12">
+      <label for="c12">챗봇 — 빠른 질문 버튼 5개 표시됨</label>
+    </div>
+    <div class="check-item">
+      <input type="checkbox" id="c13">
+      <label for="c13">챗봇 — 질문 입력 후 마르코 답변 정상 수신됨</label>
+    </div>
+    <div class="check-item">
+      <input type="checkbox" id="c14">
+      <label for="c14">챗봇 — "작동 원리" 질문 시 거절 메시지 표시됨</label>
+    </div>
+    <div class="check-item">
+      <input type="checkbox" id="c15">
+      <label for="c15">무료 폼 — 17개 질문 순서대로 표시, 제출 전 확인 화면 표시됨</label>
+    </div>
+    <div class="check-item">
+      <input type="checkbox" id="c16">
+      <label for="c16">유료 회원가입 폼 — 건당/Pro월정액/Pro연간 플랜 선택 가능</label>
+    </div>
+    <div class="check-item">
+      <input type="checkbox" id="c17">
+      <label for="c17">유료 회원가입 폼 — 플랜 선택에 따라 입금자명과 금액이 다르게 표시됨</label>
+    </div>
+    <div class="check-item">
+      <input type="checkbox" id="c18">
+      <label for="c18">모바일 — 랜딩페이지가 모바일에서도 정상 표시됨</label>
+    </div>
+  </div>
+
+  <!-- 전체 진행 현황 -->
+  <p class="section-title">전체 진행 현황</p>
+  <div class="progress-wrap">
+    <p class="progress-title">마르코 MVP 구축 현황</p>
+    <div class="progress-items">
+      <div class="progress-item done-item"><div class="progress-dot done"></div>에어테이블 6개 테이블 + Link 연결</div>
+      <div class="progress-item done-item"><div class="progress-dot done"></div>FC·TG·TR·MS·RT 프레임워크 적용</div>
+      <div class="progress-item done-item"><div class="progress-dot done"></div>Fillout 무료 진단 폼 (17개 질문)</div>
+      <div class="progress-item done-item"><div class="progress-dot done"></div>Fillout Pro 등록 폼 (20개 질문)</div>
+      <div class="progress-item done-item"><div class="progress-dot done"></div>Fillout 유료 회원가입 폼 (4개 질문 + 입금 안내)</div>
+      <div class="progress-item done-item"><div class="progress-dot done"></div>랜딩페이지 v6 (베타 배지 + 업데이트 로그)</div>
+      <div class="progress-item done-item"><div class="progress-dot done"></div>샘플 리포트 페이지 (Pro 블러 + 전환 CTA)</div>
+      <div class="progress-item done-item"><div class="progress-dot done"></div>무료 진단 리포트 템플릿 v2</div>
+      <div class="progress-item done-item"><div class="progress-dot done"></div>마르코 챗봇 (Pro 전용 · Claude API 연동)</div>
+      <div class="progress-item pending-item"><div class="progress-dot pending"></div>Make 자동화 (이메일 자동 발송)</div>
+      <div class="progress-item pending-item"><div class="progress-dot pending"></div>미션라이브러리 데이터 25개 입력</div>
+      <div class="progress-item pending-item"><div class="progress-dot pending"></div>Pro 리포트 템플릿 제작</div>
+      <div class="progress-item pending-item"><div class="progress-dot pending"></div>GitHub Pages 배포 (챗봇 + 파일 호스팅)</div>
+      <div class="progress-item pending-item"><div class="progress-dot pending"></div>Paddle 결제 연동 (승인 대기 중)</div>
+      <div class="progress-item pending-item"><div class="progress-dot pending"></div>전체 테스트 후 배포</div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// 체크박스 상태 로컬스토리지 저장
+document.querySelectorAll('input[type=checkbox]').forEach(cb => {
+  const saved = localStorage.getItem(cb.id);
+  if (saved === 'true') cb.checked = true;
+  cb.addEventListener('change', () => {
+    localStorage.setItem(cb.id, cb.checked);
+  });
+});
+</script>
+
+</body>
+</html>
