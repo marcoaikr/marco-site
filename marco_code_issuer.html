@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>마르코 Pro 코드 발급</title>
+<style>
+*{box-sizing:border-box} body{font-family:-apple-system,'Malgun Gothic',sans-serif;background:#f4f4f7;margin:0;padding:24px;color:#1a1a1a}
+.card{max-width:480px;margin:20px auto;background:#fff;border-radius:12px;padding:24px;box-shadow:0 2px 8px rgba(0,0,0,.06)}
+h1{font-size:19px;margin:0 0 4px} .sub{color:#666;font-size:13px;margin-bottom:18px}
+label{font-weight:600;font-size:12px;display:block;margin:12px 0 5px;color:#444}
+input{width:100%;padding:10px 12px;border:1px solid #ddd;border-radius:8px;font-size:14px}
+button{width:100%;margin-top:18px;background:#6d5efc;color:#fff;border:none;padding:12px;border-radius:8px;font-size:15px;font-weight:700;cursor:pointer}
+button:disabled{opacity:.5}
+.result{margin-top:18px;padding:16px;border-radius:8px;display:none}
+.ok{background:#dcfce7;border:1px solid #86efac}
+.err{background:#fee2e2;border:1px solid #fca5a5}
+.code{font-size:22px;font-weight:800;color:#6d5efc;letter-spacing:1px;margin:6px 0}
+.link{font-size:12px;word-break:break-all;background:#f4f4f7;padding:8px;border-radius:6px;margin-top:8px}
+.hint{font-size:11px;color:#999;margin-top:4px}
+</style></head><body>
+<div class="card">
+<h1>마르코 Pro 코드 발급</h1>
+<p class="sub">Pro 결제 확인 후, 이용자별 코드를 발급합니다. (운영자 전용)</p>
+
+<label>ADMIN_KEY <span class="hint">(Cloudflare에 설정한 그 값)</span></label>
+<input id="adminKey" type="password" placeholder="marco-admin-...">
+
+<label>이용자 이메일 <span class="hint">(기록용)</span></label>
+<input id="email" placeholder="user@example.com">
+
+<label>플랜</label>
+<input id="plan" value="pro">
+
+<label>만료일 <span class="hint">(YYYY-MM-DD, 비우면 무기한)</span></label>
+<input id="expires" placeholder="2026-12-31">
+
+<label>일일 한도</label>
+<input id="dailyLimit" type="number" value="40">
+
+<button id="btn" onclick="issue()">코드 발급 ▶</button>
+
+<div id="result" class="result"></div>
+</div>
+
+<script>
+const API = 'https://marco-chat-api.marco-ai-kr.workers.dev/admin/issue';
+const CHAT = 'https://marcoai.kr/marco_chat.html';
+async function issue(){
+ const btn=document.getElementById('btn'); const R=document.getElementById('result');
+ btn.disabled=true; btn.textContent='발급 중...';
+ try{
+  const res=await fetch(API,{method:'POST',headers:{'Content-Type':'application/json'},
+   body:JSON.stringify({
+    adminKey:document.getElementById('adminKey').value.trim(),
+    email:document.getElementById('email').value.trim(),
+    plan:document.getElementById('plan').value.trim()||'pro',
+    expires:document.getElementById('expires').value.trim(),
+    dailyLimit:parseInt(document.getElementById('dailyLimit').value)||40
+   })});
+  const data=await res.json();
+  if(data.success){
+   R.className='result ok'; R.style.display='block';
+   R.innerHTML='<div>✅ 발급 완료</div><div class="code">'+data.code+'</div>'+
+     '<div class="hint">이용자에게 보낼 링크(클릭 시 자동 인증):</div>'+
+     '<div class="link">'+CHAT+'?code='+data.code+'</div>';
+  }else{
+   R.className='result err'; R.style.display='block';
+   R.innerHTML='⚠️ '+(data.error||'발급 실패')+'<div class="hint">ADMIN_KEY가 맞는지 확인하세요.</div>';
+  }
+ }catch(e){
+  R.className='result err'; R.style.display='block';
+  R.innerHTML='⚠️ 호출 실패: '+e.message;
+ }
+ btn.disabled=false; btn.textContent='코드 발급 ▶';
+}
+</script></body></html>
