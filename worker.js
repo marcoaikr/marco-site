@@ -507,7 +507,7 @@ async function callClaude(env, systemPrompt, userInput, maxTokens = 1500) {
     body: JSON.stringify({
       model: 'claude-haiku-4-5-20251001',
       max_tokens: maxTokens,
-      system: [{ type: 'text', text: systemPrompt, cache_control: { type: 'ephemeral' } }],
+      system: systemPrompt,
       messages: messages,
     }),
   });
