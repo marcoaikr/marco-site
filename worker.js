@@ -373,7 +373,7 @@ async function handleDiagnosis(request, env) {
 async function handleChat(request, env) {
   try {
     const body = await request.json();
-    const { messages, clientContext, code } = body;
+    const { messages, clientContext, email } = body;
 
     if (!messages || !Array.isArray(messages)) {
       return new Response(JSON.stringify({ error: '메시지가 없습니다' }), {
@@ -382,10 +382,10 @@ async function handleChat(request, env) {
       });
     }
 
-    // ── Pro 코드 인증 + 일일 한도 ──
-    const auth = await verifyCode(env, code);
+    // ── Pro 이메일 인증 + 일일 한도 (이용자DB 조회) ──
+    const auth = await verifyEmail(env, email);
     if (!auth.ok) {
-      return new Response(JSON.stringify({ error: auth.reason, needCode: auth.needCode || false }), {
+      return new Response(JSON.stringify({ error: auth.reason, needEmail: auth.needEmail || false }), {
         status: 403,
         headers: CORS_HEADERS
       });
@@ -416,34 +416,79 @@ async function handleChat(request, env) {
 }
 
 // ────────────────────────────────────────────────────────────
-// Pro 코드 인증 + 일일 한도 (KV: MARCO_KV 바인딩 필요)
+// Pro 이메일 인증 + 일일 한도
+// 이용자DB(Airtable)를 조회해 플랜이 Pro면 통과. 일일 한도는 이메일별로 KV 카운트.
+// 필요 환경변수: AIRTABLE_API_KEY (data.records:read 권한, 마르코_MVP 베이스 접근)
+// 일일 한도 카운트에는 기존 MARCO_KV 바인딩 재사용.
 // ────────────────────────────────────────────────────────────
-async function verifyCode(env, code) {
-  if (!code) return { ok: false, needCode: true, reason: '먼저 Pro 코드를 입력해주세요.' };
-  if (!env.MARCO_KV) return { ok: false, reason: '인증 저장소가 설정되지 않았습니다. (KV 바인딩 확인)' };
+async function verifyEmail(env, email) {
+  if (!email) return { ok: false, needEmail: true, reason: '먼저 가입하신 이메일을 입력해주세요.' };
+  if (!env.AIRTABLE_API_KEY) return { ok: false, reason: '인증 설정 오류입니다. (AIRTABLE_API_KEY 확인)' };
 
-  const raw = await env.MARCO_KV.get('code:' + code);
-  if (!raw) return { ok: false, needCode: true, reason: '유효하지 않은 코드입니다. 코드를 다시 확인해주세요.' };
+  const normalizedEmail = String(email).trim().toLowerCase();
 
-  const info = JSON.parse(raw);
+  // ── 1. 베이스 ID 찾기 ──
+  let baseId;
+  try {
+    const basesRes = await fetch('https://api.airtable.com/v0/meta/bases', {
+      headers: { Authorization: 'Bearer ' + env.AIRTABLE_API_KEY },
+    });
+    if (!basesRes.ok) return { ok: false, reason: '인증 확인 중 오류가 발생했어요. 잠시 후 다시 시도해주세요.' };
+    const basesData = await basesRes.json();
+    // 베이스 이름에 보이지 않는 공백이 있을 수 있어 trim + 포함 비교로 안전하게 찾음
+    const base = basesData.bases.find((b) => (b.name || '').replace(/\s/g, '').includes('마르코_MVP'.replace(/\s/g, '')));
+    if (!base) return { ok: false, reason: '인증 설정 오류입니다. (베이스 없음)' };
+    baseId = base.id;
+  } catch (e) {
+    return { ok: false, reason: '인증 확인 중 오류가 발생했어요. 잠시 후 다시 시도해주세요.' };
+  }
 
-  // 만료 확인
-  if (info.expires && new Date(info.expires) < new Date()) {
+  // ── 2. 이용자DB에서 이메일로 조회 (대소문자 무시하려 LOWER 비교) ──
+  let user;
+  try {
+    const filter = encodeURIComponent(`LOWER({이메일})='${normalizedEmail.replace(/'/g, "\\'")}'`);
+    const userRes = await fetch(
+      `https://api.airtable.com/v0/${baseId}/${encodeURIComponent('이용자DB')}?filterByFormula=${filter}&maxRecords=1`,
+      { headers: { Authorization: 'Bearer ' + env.AIRTABLE_API_KEY } }
+    );
+    if (!userRes.ok) return { ok: false, reason: '인증 확인 중 오류가 발생했어요. 잠시 후 다시 시도해주세요.' };
+    const userData = await userRes.json();
+    if (!userData.records || userData.records.length === 0) {
+      return { ok: false, needEmail: true, reason: '등록되지 않은 이메일이에요. 가입하신 이메일을 확인해주세요.' };
+    }
+    user = userData.records[0];
+  } catch (e) {
+    return { ok: false, reason: '인증 확인 중 오류가 발생했어요. 잠시 후 다시 시도해주세요.' };
+  }
+
+  // ── 3. Pro 판정 (요청 폼과 동일 기준: 플랜에 'Pro' 포함) ──
+  const plan = String(user.fields['플랜'] || '');
+  const isPro = plan.includes('Pro');
+  if (!isPro) {
+    return { ok: false, reason: '마르코 챗봇은 Pro 이용자 전용이에요. Pro 구독 후 이용해주세요.' };
+  }
+
+  // ── 4. 구독 만료 확인 (구독만료일이 있으면 과거인지 체크) ──
+  const expiry = user.fields['구독만료일'];
+  if (expiry && new Date(expiry) < new Date()) {
     return { ok: false, reason: 'Pro 이용 기간이 만료되었어요. 갱신 후 다시 이용해주세요.' };
   }
 
-  // 일일 한도 (날짜별 카운트 키, TTL 2일 → 자동 만료라 리셋 불필요)
-  const today = new Date().toISOString().slice(0, 10);
-  const countKey = 'count:' + code + ':' + today;
-  const used = parseInt((await env.MARCO_KV.get(countKey)) || '0', 10);
-  const limit = info.dailyLimit || 40;
-
-  if (used >= limit) {
-    return { ok: false, reason: '오늘 대화 한도(' + limit + '회)에 도달했어요. 내일 다시 이어가요 🙂' };
+  // ── 5. 일일 한도 (이메일별 날짜 카운트, KV TTL 2일) ──
+  const limit = 40;
+  if (env.MARCO_KV) {
+    const today = new Date().toISOString().slice(0, 10);
+    const countKey = 'count:' + normalizedEmail + ':' + today;
+    const used = parseInt((await env.MARCO_KV.get(countKey)) || '0', 10);
+    if (used >= limit) {
+      return { ok: false, reason: '오늘 대화 한도(' + limit + '회)에 도달했어요. 내일 다시 이어가요 🙂' };
+    }
+    await env.MARCO_KV.put(countKey, String(used + 1), { expirationTtl: 172800 });
+    return { ok: true, remaining: limit - used - 1 };
   }
 
-  await env.MARCO_KV.put(countKey, String(used + 1), { expirationTtl: 172800 });
-  return { ok: true, remaining: limit - used - 1 };
+  // KV 없으면 한도 없이 통과 (일일 한도만 스킵)
+  return { ok: true, remaining: limit };
 }
 
 // ────────────────────────────────────────────────────────────
@@ -505,7 +550,7 @@ async function callClaude(env, systemPrompt, userInput, maxTokens = 1500) {
       'anthropic-version': '2023-06-01',
     },
     body: JSON.stringify({
-      model: 'claude-haiku-4-5-20251001',
+      model: 'claude-haiku-4-5',
       max_tokens: maxTokens,
       system: systemPrompt,
       messages: messages,
@@ -514,6 +559,7 @@ async function callClaude(env, systemPrompt, userInput, maxTokens = 1500) {
 
   if (!response.ok) {
     const error = await response.json();
+    console.log('CLAUDE_ERROR_FULL status=' + response.status + ' body=' + JSON.stringify(error));
     throw new Error(`Claude API 오류: ${error.error?.message || response.status}`);
   }
 
