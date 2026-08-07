@@ -550,7 +550,7 @@ async function callClaude(env, systemPrompt, userInput, maxTokens = 1500) {
       'anthropic-version': '2023-06-01',
     },
     body: JSON.stringify({
-      model: 'claude-haiku-4-5',
+      model: 'claude-sonnet-4-6',
       max_tokens: maxTokens,
       system: systemPrompt,
       messages: messages,
