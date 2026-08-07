@@ -201,15 +201,15 @@ body{
 </head>
 <body>
 
-<!-- CODE GATE (Pro 코드 인증) -->
+<!-- EMAIL GATE (Pro 이메일 인증) -->
 <div id="codeGate" style="display:none;position:fixed;inset:0;background:#faf9ff;z-index:9999;flex-direction:column;align-items:center;justify-content:center;padding:24px;text-align:center">
   <div style="font-size:26px;font-weight:800;color:#6d5efc;margin-bottom:6px">MARCO</div>
   <h2 style="font-size:19px;margin:0 0 8px;color:#1a1a1a">마르코 Pro 챗봇</h2>
-  <p style="font-size:14px;color:#666;margin:0 0 20px;line-height:1.6">Pro 이용자 전용입니다.<br>메일로 받으신 코드를 입력해주세요.</p>
-  <input id="codeInput" placeholder="MARCO-XXXX" style="width:220px;padding:11px;border:1px solid #ddd;border-radius:8px;font-size:15px;text-align:center;text-transform:uppercase" onkeydown="if(event.key==='Enter')submitCode()">
+  <p style="font-size:14px;color:#666;margin:0 0 20px;line-height:1.6">Pro 이용자 전용입니다.<br>가입하신 이메일을 입력해주세요.</p>
+  <input id="codeInput" type="email" placeholder="이메일 주소" style="width:240px;padding:11px;border:1px solid #ddd;border-radius:8px;font-size:15px;text-align:center" onkeydown="if(event.key==='Enter')submitCode()">
   <button onclick="submitCode()" style="margin-top:12px;background:#6d5efc;color:#fff;border:none;padding:11px 26px;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer">입장하기</button>
   <p id="codeError" style="color:#dc2626;font-size:12px;margin-top:10px;min-height:16px"></p>
-  <p style="font-size:12px;color:#999;margin-top:18px">코드가 없으신가요? Pro 가입 시 메일로 발급됩니다.<br>문의: hello@marcoai.kr</p>
+  <p style="font-size:12px;color:#999;margin-top:18px">Pro 가입 시 등록한 이메일로 입장하실 수 있어요.<br>문의: hello@marcoai.kr</p>
 </div>
 
 <!-- HEADER -->
@@ -258,23 +258,23 @@ body{
 <p class="notice">마르코 Pro 전용 · 마르코 활용 · 리포트 해석 · 마케터 성장을 돕습니다</p>
 
 <script>
-// ── Pro 코드 인증 ──
-function getCode(){ return (localStorage.getItem('marco_code')||'').trim(); }
+// ── Pro 이메일 인증 ──
+function getEmail(){ return (localStorage.getItem('marco_email')||'').trim(); }
 function showCodeGate(msg){
   document.getElementById('codeGate').style.display='flex';
   if(msg) document.getElementById('codeError').textContent=msg;
 }
 function submitCode(){
-  const v=document.getElementById('codeInput').value.trim().toUpperCase();
-  if(!v){ document.getElementById('codeError').textContent='코드를 입력해주세요.'; return; }
-  localStorage.setItem('marco_code', v);
+  const v=document.getElementById('codeInput').value.trim().toLowerCase();
+  if(!v || !v.includes('@')){ document.getElementById('codeError').textContent='올바른 이메일을 입력해주세요.'; return; }
+  localStorage.setItem('marco_email', v);
   document.getElementById('codeGate').style.display='none';
   document.getElementById('codeError').textContent='';
 }
 (function initCode(){
-  const urlCode=new URLSearchParams(location.search).get('code');
-  if(urlCode){ localStorage.setItem('marco_code', urlCode.trim().toUpperCase()); }
-  if(!getCode()){ showCodeGate(); }
+  const urlEmail=new URLSearchParams(location.search).get('email');
+  if(urlEmail){ localStorage.setItem('marco_email', urlEmail.trim().toLowerCase()); }
+  if(!getEmail()){ showCodeGate(); }
 })();
 const SYSTEM_PROMPT = `당신은 마르코(MARCO)의 고객 지원 AI입니다. Pro 전용 채널에서 유료 이용자의 질문에 답변합니다.
 
@@ -421,7 +421,7 @@ async function sendMessage() {
       },
       body: JSON.stringify({
         messages: messages,
-        code: getCode()
+        email: getEmail()
       })
     });
 
@@ -432,10 +432,10 @@ async function sendMessage() {
       hideTyping();
       addMessage('marco', reply);
       messages.push({ role: 'assistant', content: reply });
-    } else if (data.needCode) {
+    } else if (data.needEmail) {
       hideTyping();
-      localStorage.removeItem('marco_code');
-      showCodeGate(data.error || '코드를 다시 입력해주세요.');
+      localStorage.removeItem('marco_email');
+      showCodeGate(data.error || '이메일을 다시 입력해주세요.');
     } else {
       hideTyping();
       addMessage('marco', data.error || '죄송합니다, 일시적인 오류가 발생했습니다. 잠시 후 다시 시도해주세요.', true);
