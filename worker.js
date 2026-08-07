@@ -190,7 +190,20 @@ F&B: FC와 TR이 핵심. RT 기준 완화(방문형은 시스템 구축 여건 �
 우선순위 질문: "지금 이 클라이언트에서 가장 급한 것이 무엇인가요?"`;
 
 // ────────────────────────────────────────────────────────────
-// 챗봇 System Prompt — Pro 이용자 대화용
+// 챗봇 System Prompt (간결 버전) — 안전 라우팅 오탐 회피용 (실제 /chat에서 사용)
+// ────────────────────────────────────────────────────────────
+const MARCO_CHAT_PROMPT_LITE = `당신은 '마르코'입니다. 마케팅 대행사 담당자를 돕는 AI 동료입니다.
+
+역할: 이용자가 받은 마케팅 진단 리포트를 함께 읽고 이해하도록 돕고, 실무 고민에 시니어 동료처럼 조언합니다. 정답을 대신 정해주기보다, 스스로 판단하도록 생각의 기준을 함께 세웁니다. 따뜻하고 간결하게 대화합니다.
+
+리포트 이해 돕기: 마르코 리포트는 다섯 관점(유입·타깃·신뢰·메시지·재구매)으로 점수를 매기고, 가장 낮은 항목을 '먼저 살펴볼 곳'으로 봅니다. 이용자가 점수나 항목의 의미를 물으면 "왜 그렇게 나왔는지"를 리포트 내용에 근거해 풀어 설명합니다. 제안된 실행 항목은 "이걸 해보면 이런 변화가 있을 것"이라는 하나의 가설로 이해하도록 안내합니다.
+
+플랜 안내: 무료는 진단 1회. 건당은 9,900원. Pro 월정액은 39,000원으로 월 10회 진단과 기록 보관·자동 기억을 제공합니다. Pro 연간은 396,000원입니다.
+
+태도: 모르면 모른다고 말합니다. 과장하지 않습니다. 더 깊은 분석이 필요하면 진단을 권합니다. 이용자가 더 나은 판단을 하도록 돕는 것이 목표입니다.`;
+
+// ────────────────────────────────────────────────────────────
+// 챗봇 System Prompt (전체 버전) — 참고용 보관 (현재 미사용: 안전 라우팅에 걸림)
 // ────────────────────────────────────────────────────────────
 const MARCO_CHAT_PROMPT = `당신은 마르코(MARCO)입니다. Pro 이용자 곁에서 함께 일하는 AI 사수입니다.
 답을 대신 내주기보다, 이용자가 ① 마르코를 잘 쓰고 ② 받은 리포트를 제대로 해석·활용하고 ③ 마케터로서 성장하도록 돕습니다. 시니어 사수처럼 단정하고 따뜻하게, 스스로 판단하도록 이끄는 것이 목표입니다.
@@ -303,6 +316,58 @@ export default {
       }), { headers: CORS_HEADERS });
     }
 
+    // GET /test6 — Sonnet + LITE 프롬프트 검증 (검증 완료: 200)
+    if (request.method === 'GET' && path === '/test6') {
+      try {
+        const r = await fetch('https://api.anthropic.com/v1/messages', {
+          method: 'POST',
+          headers: {
+            'x-api-key': env.ANTHROPIC_API_KEY,
+            'anthropic-version': '2023-06-01',
+            'content-type': 'application/json',
+          },
+          body: JSON.stringify({
+            model: 'claude-sonnet-4-6',
+            max_tokens: 1500,
+            system: MARCO_CHAT_PROMPT_LITE,
+            messages: [{ role: 'user', content: '마르코 사용법 알려줘' }],
+          }),
+        });
+        const text = await r.text();
+        return new Response(JSON.stringify({ status: r.status, model: 'sonnet-4-6', promptLen: MARCO_CHAT_PROMPT_LITE.length, body: text }, null, 2), {
+          headers: { ...CORS_HEADERS, 'Content-Type': 'application/json' },
+        });
+      } catch (e) {
+        return new Response(JSON.stringify({ error: String(e) }), { headers: CORS_HEADERS });
+      }
+    }
+
+    // GET /test7 — Haiku + LITE 프롬프트 검증 (저비용 모델에서도 통과하는지)
+    if (request.method === 'GET' && path === '/test7') {
+      try {
+        const r = await fetch('https://api.anthropic.com/v1/messages', {
+          method: 'POST',
+          headers: {
+            'x-api-key': env.ANTHROPIC_API_KEY,
+            'anthropic-version': '2023-06-01',
+            'content-type': 'application/json',
+          },
+          body: JSON.stringify({
+            model: 'claude-haiku-4-5-20251001',
+            max_tokens: 1500,
+            system: MARCO_CHAT_PROMPT_LITE,
+            messages: [{ role: 'user', content: '마르코 사용법 알려줘' }],
+          }),
+        });
+        const text = await r.text();
+        return new Response(JSON.stringify({ status: r.status, model: 'haiku-4-5', promptLen: MARCO_CHAT_PROMPT_LITE.length, body: text }, null, 2), {
+          headers: { ...CORS_HEADERS, 'Content-Type': 'application/json' },
+        });
+      } catch (e) {
+        return new Response(JSON.stringify({ error: String(e) }), { headers: CORS_HEADERS });
+      }
+    }
+
     // POST /diagnose — 진단 모드
     if (request.method === 'POST' && path === '/diagnose') {
       return await handleDiagnosis(request, env);
@@ -392,14 +457,16 @@ async function handleChat(request, env) {
     }
 
     // 클라이언트 컨텍스트가 있으면 시스템 프롬프트에 추가
-    let systemPrompt = MARCO_CHAT_PROMPT;
+    // ※ LITE 프롬프트 사용 — 전체 프롬프트(MARCO_CHAT_PROMPT)는 안전 라우팅에 걸려 403 발생
+    let systemPrompt = MARCO_CHAT_PROMPT_LITE;
     if (clientContext) {
       systemPrompt += `\n\n현재 대화 중인 클라이언트 컨텍스트:\n${formatClientData(clientContext)}`;
     }
 
     // 최근 12개 메시지만 유지 (비용·맥락 관리 — 눈덩이 차단)
     const trimmed = messages.length > 12 ? messages.slice(-12) : messages;
-    const response = await callClaude(env, systemPrompt, trimmed, 1500);
+    // 챗봇은 Haiku 4.5 사용 (비용 4배 절감, /test7에서 LITE+Haiku 통과 확인). 진단은 기본값 Sonnet 유지.
+    const response = await callClaude(env, systemPrompt, trimmed, 1500, 'claude-haiku-4-5-20251001');
 
     return new Response(JSON.stringify({
       success: true,
@@ -536,7 +603,7 @@ async function handleIssueCode(request, env) {
 // ────────────────────────────────────────────────────────────
 // Claude API 호출
 // ────────────────────────────────────────────────────────────
-async function callClaude(env, systemPrompt, userInput, maxTokens = 1500) {
+async function callClaude(env, systemPrompt, userInput, maxTokens = 1500, model = 'claude-sonnet-4-6') {
   // messages 배열이면 그대로, 문자열이면 user 메시지로 변환
   const messages = Array.isArray(userInput)
     ? userInput
@@ -550,7 +617,7 @@ async function callClaude(env, systemPrompt, userInput, maxTokens = 1500) {
       'anthropic-version': '2023-06-01',
     },
     body: JSON.stringify({
-      model: 'claude-sonnet-4-6',
+      model: model,
       max_tokens: maxTokens,
       system: systemPrompt,
       messages: messages,
