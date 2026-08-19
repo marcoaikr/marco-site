@@ -237,14 +237,6 @@ body{
   </div>
 </div>
 
-<!-- QUICK QUESTIONS -->
-<div class="quick-wrap" id="quickWrap">
-  <button class="quick-btn" onclick="sendQuick('무료 진단은 어떻게 신청하나요?')">무료 진단 신청 방법</button>
-  <button class="quick-btn" onclick="sendQuick('진단 리포트는 언제 받을 수 있나요?')">리포트 수령 시간</button>
-  <button class="quick-btn" onclick="sendQuick('Pro 플랜과 건당의 차이가 뭔가요?')">플랜 차이 비교</button>
-  <button class="quick-btn" onclick="sendQuick('클라이언트를 추가하려면 어떻게 해야 하나요?')">클라이언트 추가 방법</button>
-  <button class="quick-btn" onclick="sendQuick('FC·TG·TR·MS·RT가 각각 무엇인가요?')">5가지 진단 항목 설명</button>
-</div>
 
 <!-- INPUT -->
 <div class="input-area">
@@ -400,9 +392,6 @@ async function sendMessage() {
   const text = input.value.trim();
   if (!text || isLoading) return;
 
-  // 빠른 질문 버튼 숨기기
-  document.getElementById('quickWrap').style.display = 'none';
-
   input.value = '';
   input.style.height = 'auto';
   isLoading = true;
@@ -448,11 +437,6 @@ async function sendMessage() {
   isLoading = false;
   document.getElementById('sendBtn').disabled = false;
   input.focus();
-}
-
-function sendQuick(text) {
-  document.getElementById('userInput').value = text;
-  sendMessage();
 }
 
 function handleKey(e) {
