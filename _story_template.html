@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<!--
+════════════════════════════════════════════════════════════════════
+  📄 마르코 스토리 템플릿 — 새 스토리 만드는 법
+════════════════════════════════════════════════════════════════════
+  1) 이 파일을 story/marco_story_02.html 처럼 복사한다 (번호만 +1).
+  2) 아래 {{토큰}}을 찾아 바꾼다 (Ctrl+H 전체 치환 추천):
+
+     {{SLUG}}          → 파일명(확장자 제외). 예: marco_story_02
+     {{TITLE}}         → 글 제목 (검색·SNS 제목으로도 쓰임)
+     {{DESCRIPTION}}   → 한두 문장 요약 (검색 결과·SNS 설명)
+     {{DATE_ISO}}      → 발행일 YYYY-MM-DD. 예: 2026-09-01
+     {{DATE_HUMAN}}    → 사람이 읽는 날짜. 예: 2026년 9월
+     {{KICKER}}        → 카테고리. 예: 매출 정체 / 재구매 / 채널 진단
+     {{DIAG_TYPE}}     → 진단 유형 한 줄. 예: 매출 정체 진단
+     {{LEAD}}          → 도입 리드문 1~2문장 (h1 아래 큰 글씨)
+
+  3) 본문: 아래 <!-- ✏️ 본문 시작 --> ~ <!-- ✏️ 본문 끝 --> 사이를
+     H2 + p 블록으로 채운다. (아래 예시 그대로 복사해서 늘리면 됨)
+
+  4) FAQ: 두 군데를 같은 내용으로 채운다 — 반드시 짝을 맞출 것.
+     (A) <head> 안의 FAQ JSON-LD  (B) 본문 하단의 눈에 보이는 FAQ
+     ※ AI 검색 노출을 위해 (A)가 중요하니 비우지 말 것.
+
+  5) 마지막에 story/index.html 목록 맨 위에 카드 한 장 추가.
+
+  ⚠️ 지켜야 할 것:
+     - 클라이언트/제품/지역/경쟁사 실명 금지. 가릴 땐 * 사용.
+     - 5가지 관점은 한글로: 유입·타깃·신뢰·메시지·재구매 (약어는 괄호 병기).
+     - 두 점수 카드가 없는 스토리면 .scores 블록을 통째로 지워도 됨.
+════════════════════════════════════════════════════════════════════
+-->
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>{{TITLE}} — 마르코 스토리</title>
+<meta name="description" content="{{DESCRIPTION}}">
+<meta name="robots" content="index, follow, max-image-preview:large">
+<link rel="canonical" href="https://marcoai.kr/story/{{SLUG}}.html">
+
+<!-- Open Graph -->
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="MARCO — 마케터의 세 번째 뇌">
+<meta property="og:title" content="{{TITLE}} — 마르코 스토리">
+<meta property="og:description" content="{{DESCRIPTION}}">
+<meta property="og:url" content="https://marcoai.kr/story/{{SLUG}}.html">
+<meta property="og:image" content="https://marcoai.kr/marco_og.png">
+<meta property="og:locale" content="ko_KR">
+<meta name="twitter:card" content="summary_large_image">
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+
+<!-- 구조화 데이터: Article -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "{{TITLE}}",
+  "description": "{{DESCRIPTION}}",
+  "image": "https://marcoai.kr/marco_og.png",
+  "datePublished": "{{DATE_ISO}}",
+  "dateModified": "{{DATE_ISO}}",
+  "author": { "@type": "Organization", "name": "MARCO", "url": "https://marcoai.kr" },
+  "publisher": {
+    "@type": "Organization",
+    "name": "MARCO",
+    "description": "마케터의 세 번째 뇌 · 대행사 AE·프리랜서·인하우스 마케터를 위한 마케팅 진단 서비스",
+    "logo": { "@type": "ImageObject", "url": "https://marcoai.kr/marco_og.png" }
+  },
+  "mainEntityOfPage": { "@type": "WebPage", "@id": "https://marcoai.kr/story/{{SLUG}}.html" }
+}
+</script>
+
+<!-- 구조화 데이터: FAQ (A) — 본문 FAQ와 짝 맞출 것 -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "{{FAQ1_Q}}",
+      "acceptedAnswer": { "@type": "Answer", "text": "{{FAQ1_A}}" }
+    },
+    {
+      "@type": "Question",
+      "name": "{{FAQ2_Q}}",
+      "acceptedAnswer": { "@type": "Answer", "text": "{{FAQ2_A}}" }
+    },
+    {
+      "@type": "Question",
+      "name": "{{FAQ3_Q}}",
+      "acceptedAnswer": { "@type": "Answer", "text": "{{FAQ3_A}}" }
+    }
+  ]
+}
+</script>
+
+<!-- 구조화 데이터: Breadcrumb -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    { "@type": "ListItem", "position": 1, "name": "MARCO", "item": "https://marcoai.kr" },
+    { "@type": "ListItem", "position": 2, "name": "마르코 스토리", "item": "https://marcoai.kr/story/" },
+    { "@type": "ListItem", "position": 3, "name": "{{TITLE}}" }
+  ]
+}
+</script>
+
+<style>
+  :root{
+    --purple:#6B46E5; --purple-soft:#f3f0fe;
+    --red:#DD4436; --red-soft:#fdecea;
+    --green:#22A05F; --green-soft:#e9f7ef;
+    --orange:#E08A33;
+    --ink:#1a1a2e; --body:#3a3a4a; --mute:#8a8a99;
+    --line:#eceaf3; --bg:#ffffff; --dark:#16121f;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:"Pretendard Variable",Pretendard,-apple-system,sans-serif;color:var(--body);background:#faf9fc;line-height:1.75;-webkit-font-smoothing:antialiased}
+  a{color:inherit}
+  .wrap{max-width:760px;margin:0 auto;padding:0 20px}
+  .hd{background:var(--dark);color:#fff}
+  .hd .wrap{display:flex;align-items:center;gap:12px;height:56px}
+  .hd .logo{font-weight:800;font-size:19px;letter-spacing:.5px;color:#fff;text-decoration:none}
+  .hd .logo b{color:#c9ff5b}
+  .hd .tag{font-size:12px;color:#b9b3c9;padding-left:12px;border-left:1px solid #38314a}
+  .bc{font-size:12.5px;color:var(--mute);padding:16px 0 0}
+  .bc a{text-decoration:none}
+  .bc span{color:var(--purple)}
+  article{background:var(--bg);border:1px solid var(--line);border-radius:18px;margin:16px 0 28px;padding:40px 32px;box-shadow:0 8px 40px rgba(80,60,160,.06)}
+  .kicker{display:inline-block;font-size:12.5px;font-weight:700;color:var(--purple);background:var(--purple-soft);padding:5px 12px;border-radius:99px;margin-bottom:16px}
+  h1{font-size:30px;line-height:1.32;color:var(--ink);font-weight:800;letter-spacing:-.4px;margin-bottom:14px}
+  .lead{font-size:16.5px;color:var(--body);margin-bottom:8px}
+  .mask-note{font-size:12.5px;color:var(--mute);background:#f6f5fa;border-radius:10px;padding:10px 14px;margin:18px 0 4px}
+  .meta{font-size:13px;color:var(--mute);margin-top:14px;padding-bottom:22px;border-bottom:1px solid var(--line)}
+  h2{font-size:21px;color:var(--ink);font-weight:800;letter-spacing:-.3px;margin:38px 0 14px;padding-top:6px}
+  p{margin:0 0 16px;font-size:16px}
+  strong{color:var(--ink);font-weight:700}
+  .em-purple{color:var(--purple);font-weight:700}
+  blockquote{border-left:3px solid var(--purple);background:var(--purple-soft);border-radius:0 12px 12px 0;padding:16px 20px;margin:0 0 20px;font-size:16px;color:var(--ink)}
+  blockquote cite{display:block;margin-top:8px;font-size:13px;color:var(--mute);font-style:normal}
+  .scores{display:flex;gap:14px;margin:22px 0 8px;flex-wrap:wrap}
+  .score{flex:1 1 220px;border-radius:14px;padding:20px 22px}
+  .score.red{background:var(--red-soft)}
+  .score.green{background:var(--green-soft)}
+  .score .lbl{font-size:12.5px;font-weight:700;margin-bottom:2px}
+  .score.red .lbl{color:var(--red)}
+  .score.green .lbl{color:var(--green)}
+  .score .num{font-size:40px;font-weight:800;line-height:1.1}
+  .score.red .num{color:var(--red)}
+  .score.green .num{color:var(--green)}
+  .score .num span{font-size:16px;color:var(--mute);font-weight:600}
+  .score .desc{font-size:13.5px;color:var(--body);margin-top:6px}
+  .lenses{display:flex;flex-wrap:wrap;gap:8px;margin:6px 0 20px}
+  .lens{font-size:13px;padding:7px 13px;border-radius:99px;background:#f4f3f8;color:var(--body);font-weight:600}
+  .lens.hot{background:var(--red-soft);color:var(--red)}
+  .lens.cool{background:var(--green-soft);color:var(--green)}
+  .callout{border-radius:12px;padding:16px 18px;margin:0 0 20px;font-size:15.5px}
+  .callout.green{background:var(--green-soft);border-left:3px solid var(--green)}
+  .callout.purple{background:var(--purple-soft);border-left:3px solid var(--purple)}
+  ul.moves{list-style:none;margin:0 0 20px;padding:0}
+  ul.moves li{position:relative;padding:10px 0 10px 30px;border-bottom:1px solid var(--line);font-size:15.5px}
+  ul.moves li:last-child{border-bottom:0}
+  ul.moves li b{color:var(--ink)}
+  ul.moves li::before{content:"";position:absolute;left:2px;top:17px;width:8px;height:8px;border-radius:2px;background:var(--purple)}
+  .faq{margin:8px 0 0}
+  .faq details{border:1px solid var(--line);border-radius:12px;margin-bottom:10px;background:#fff;overflow:hidden}
+  .faq summary{cursor:pointer;list-style:none;padding:16px 18px;font-weight:700;color:var(--ink);font-size:15.5px;display:flex;justify-content:space-between;align-items:center}
+  .faq summary::-webkit-details-marker{display:none}
+  .faq summary::after{content:"﹢";color:var(--purple);font-size:18px;margin-left:12px}
+  .faq details[open] summary::after{content:"﹣"}
+  .faq .a{padding:0 18px 18px;font-size:15px;color:var(--body)}
+  .cta{background:linear-gradient(135deg,#6B46E5,#8b6bf0);color:#fff;border-radius:18px;padding:34px 30px;text-align:center;margin:34px 0 10px}
+  .cta h3{font-size:22px;font-weight:800;margin-bottom:8px;letter-spacing:-.3px}
+  .cta p{color:#e7e0fc;font-size:15px;margin-bottom:20px}
+  .btns{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+  .btn{display:inline-block;text-decoration:none;font-weight:700;font-size:15px;padding:13px 24px;border-radius:11px}
+  .btn.solid{background:#fff;color:var(--purple)}
+  .btn.ghost{background:rgba(255,255,255,.14);color:#fff;border:1px solid rgba(255,255,255,.4)}
+  .cta .sub{color:#d7cdf7;font-size:12.5px;margin-top:16px}
+  .ft{background:var(--dark);color:#9a93ad;font-size:13px;text-align:center;padding:26px 20px;margin-top:20px}
+  .ft a{color:#c9c3d8;text-decoration:none}
+  .ft .brand{color:#fff;font-weight:700;margin-bottom:6px}
+  @media(max-width:600px){
+    article{padding:28px 20px;border-radius:14px}
+    h1{font-size:25px}h2{font-size:19px}.score .num{font-size:34px}
+  }
+</style>
+</head>
+<body>
+
+<header class="hd">
+  <div class="wrap">
+    <a class="logo" href="https://marcoai.kr">MAR<b>CO</b></a>
+    <span class="tag">마케터의 세 번째 뇌</span>
+  </div>
+</header>
+
+<div class="wrap">
+  <nav class="bc" aria-label="breadcrumb">
+    <a href="https://marcoai.kr">MARCO</a> › <a href="https://marcoai.kr/story/">마르코 스토리</a> › <span>{{TITLE}}</span>
+  </nav>
+
+  <article>
+    <span class="kicker">마르코 스토리 · {{KICKER}}</span>
+    <h1>{{TITLE}}</h1>
+    <p class="lead">{{LEAD}}</p>
+
+    <div class="mask-note">* 이 글은 실제 마르코 진단 사례입니다. 클라이언트 보호를 위해 <strong>브랜드명·제품명·지역명·경쟁사명</strong>은 <b>*</b>로 가립니다. 진단의 사고 과정과 결론만 공개합니다.</div>
+    <div class="meta">{{DATE_HUMAN}} · 진단 유형: {{DIAG_TYPE}} · 읽는 대상: 대행사 AE · 프리랜서 · 인하우스 마케터</div>
+
+    <!-- ✏️ 본문 시작 ─────────────────────────────────────────────
+         아래 예시 블록을 복사·수정해서 채운다.
+         쓸 수 있는 조각들:
+           <h2>소제목</h2>
+           <p>문단. <strong>강조</strong>, <span class="em-purple">보라 강조</span></p>
+           <blockquote>인용<cite>— 출처</cite></blockquote>
+           두 점수 카드:  <div class="scores">…</div>   (없으면 삭제)
+           5관점 칩:      <div class="lenses">…</div>
+           초록 콜아웃:    <div class="callout green">…</div>
+           보라 콜아웃:    <div class="callout purple">…</div>
+           번호 없는 첫수: <ul class="moves"><li><b>제목</b> — 설명</li>…</ul>
+    ────────────────────────────────────────────────────────────── -->
+
+    <h2>{{H2_1}}</h2>
+    <p>{{P_1}}</p>
+
+    <div class="scores">
+      <div class="score red">
+        <div class="lbl">① 먼저 풀어야 할 문제 · 지금의 병목</div>
+        <div class="num">{{BOTTLENECK_NUM}}<span> /100</span></div>
+        <div class="desc">{{BOTTLENECK_DESC}}</div>
+      </div>
+      <div class="score green">
+        <div class="lbl">② 이미 가진 강점 · 준비된 자산</div>
+        <div class="num">{{ASSET_NUM}}<span> /100</span></div>
+        <div class="desc">{{ASSET_DESC}}</div>
+      </div>
+    </div>
+
+    <div class="callout green">
+      <strong>한 줄 요약.</strong> {{SUMMARY}}
+    </div>
+
+    <h2>{{H2_2}}</h2>
+    <p>{{P_2}}</p>
+
+    <h2>이 이야기가 마케터에게 남기는 것</h2>
+    <p>{{TAKEAWAY}}</p>
+
+    <!-- ✏️ 본문 끝 ─────────────────────────────────────────────── -->
+
+    <h2>자주 묻는 질문</h2>
+    <div class="faq"><!-- FAQ (B) — head의 FAQ (A)와 같은 내용으로 -->
+      <details open>
+        <summary>{{FAQ1_Q}}</summary>
+        <div class="a">{{FAQ1_A}}</div>
+      </details>
+      <details>
+        <summary>{{FAQ2_Q}}</summary>
+        <div class="a">{{FAQ2_A}}</div>
+      </details>
+      <details>
+        <summary>{{FAQ3_Q}}</summary>
+        <div class="a">{{FAQ3_A}}</div>
+      </details>
+    </div>
+
+    <div class="cta">
+      <h3>당신의 클라이언트도, 어디가 막혔는지부터.</h3>
+      <p>채널·매출·광고비를 5분만 입력하면, 5가지 관점으로 병목을 진단해 드립니다. 첫 진단은 무료입니다.</p>
+      <div class="btns">
+        <a class="btn solid" href="https://f18m3zrtk8.zite.so">무료 진단 신청하기 →</a>
+        <a class="btn ghost" href="https://marcoai.kr/marco_landing_v10.html">마르코가 뭐하는 서비스인지 보기</a>
+      </div>
+      <div class="sub">약 5분 · 첫 진단 무료 · 검수 후 24시간 내 리포트 · 신용카드 불필요</div>
+    </div>
+  </article>
+</div>
+
+<footer class="ft">
+  <div class="brand">MARCO · 마케터의 세 번째 뇌</div>
+  <div>Act. Grow. Repeat. · <a href="mailto:hello@marcoai.kr">hello@marcoai.kr</a> · <a href="https://www.instagram.com/marco_ai_official">@marco_ai_official</a></div>
+  <div style="margin-top:8px;color:#6f6885">© 2026 MARCO. All rights reserved.</div>
+</footer>
+
+</body>
+</html>
