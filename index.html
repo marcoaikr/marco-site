@@ -741,7 +741,7 @@ footer{padding:32px 2rem;border-top:1px solid var(--border);display:flex;align-i
     <a href="#sample">샘플 리포트</a>
     <a href="#pricing">요금제</a>
     <a href="#faq">FAQ</a>
-    <a href="story/">마르코 스토리</a>
+    <a href="#story">마르코 스토리</a>
     <a href="marco_team.html" target="_blank">Team MARCO</a>
   </div>
   <a href="https://f18m3zrtk8.zite.so" target="_blank" class="nav-cta">무료 진단 신청하기</a>
@@ -756,7 +756,7 @@ footer{padding:32px 2rem;border-top:1px solid var(--border);display:flex;align-i
   <a href="#sample" onclick="closeMenu()">샘플 리포트</a>
   <a href="#pricing" onclick="closeMenu()">요금제</a>
   <a href="#faq" onclick="closeMenu()">FAQ</a>
-  <a href="story/" onclick="closeMenu()">마르코 스토리</a>
+  <a href="#story" onclick="closeMenu()">마르코 스토리</a>
   <a href="marco_team.html" target="_blank" onclick="closeMenu()">Team MARCO</a>
   <a href="https://f18m3zrtk8.zite.so" target="_blank" onclick="closeMenu()" style="color:var(--purple)!important">무료 진단 신청하기</a>
 </div>
@@ -1146,6 +1146,57 @@ footer{padding:32px 2rem;border-top:1px solid var(--border);display:flex;align-i
       </div>
     </div>
     <p style="text-align:center;font-size:15px;line-height:1.7;color:var(--text2);margin-top:32px">마르코는 일을 대신하는 도구가 아니라,<br class="brm"><strong style="color:var(--green)">당신이 더 나은 마케터가 되도록 곁에서 돕는 사수</strong>입니다.</p>
+  </div>
+</section>
+<div class="div"></div>
+<style>
+.story-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+.story-card{display:flex;flex-direction:column;background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:22px;transition:border-color .2s,transform .15s}
+.story-card:hover{border-color:var(--purple);transform:translateY(-3px)}
+.story-tag{align-self:flex-start;font-size:11.5px;font-weight:700;padding:4px 11px;border-radius:99px;margin-bottom:14px}
+.story-tag.t-b2b{background:rgba(13,148,136,.16);color:#2dd4bf}
+.story-tag.t-repo{background:rgba(96,125,231,.20);color:#93b0ff}
+.story-tag.t-launch{background:rgba(139,92,246,.20);color:#b39dfb}
+.story-ct{font-size:16.5px;font-weight:700;color:var(--text);line-height:1.4;margin-bottom:8px;word-break:keep-all}
+.story-cx{font-size:13.5px;color:var(--text2);line-height:1.65;margin-bottom:16px;flex:1;word-break:keep-all}
+.story-mini{display:flex;gap:8px;margin-bottom:14px}
+.story-mini .sm{font-size:11.5px;font-weight:700;padding:3px 9px;border-radius:6px}
+.story-mini .sm.red{background:rgba(248,113,113,.15);color:#f87171}
+.story-mini .sm.green{background:rgba(34,197,94,.15);color:#4ade80}
+.story-more{font-size:13px;font-weight:700;color:var(--purple)}
+@media(max-width:760px){.story-grid{grid-template-columns:1fr}}
+</style>
+<section class="sec" id="story">
+  <div class="sec-inner">
+    <p class="sec-label">마르코 스토리</p>
+    <h2 class="sec-title">다른 브랜드는 어디서 막혔을까?</h2>
+    <p class="sec-sub">마르코가 실제로 진단한 케이스를 익명으로 공개합니다. 어디가 막혔는지 찾아내고 첫 수를 어떻게 뒀는지 — 읽는 것만으로도 클라이언트를 보는 눈이 트입니다.</p>
+    <div class="story-grid">
+      <a class="story-card" href="story/marco_story_03.html">
+        <span class="story-tag t-b2b">B2B/B2G 포지셔닝</span>
+        <h3 class="story-ct">"상은 다 받았는데, 검색하면 안 나온다"</h3>
+        <p class="story-cx">국제 혁신상·특허·해외 실증까지 갖췄는데 검색하면 안 나온다. 병목은 기술력이 아니라 '한 문장'이었다.</p>
+        <div class="story-mini"><span class="sm red">병목 35</span><span class="sm green">자산 70</span></div>
+        <span class="story-more">진단 기록 읽기 →</span>
+      </a>
+      <a class="story-card" href="story/marco_story_02.html">
+        <span class="story-tag t-repo">브랜드 리포지셔닝</span>
+        <h3 class="story-ct">좋은 제품이 있는데 왜 안 팔리지?</h3>
+        <p class="story-cx">40년 제조력·리뷰 8,560+·재구매 80%. 가진 게 이렇게 많은데 왜 성장이 멈췄을까? 병목은 '한 문장'이었다.</p>
+        <div class="story-mini"><span class="sm red">병목 40</span><span class="sm green">자산 90</span></div>
+        <span class="story-more">진단 기록 읽기 →</span>
+      </a>
+      <a class="story-card" href="story/marco_story_01.html">
+        <span class="story-tag t-launch">신제품 론칭</span>
+        <h3 class="story-ct">"그래서 뭐부터 하지?" 신제품 론칭 진단</h3>
+        <p class="story-cx">원료·신뢰는 이미 최상급인데 왜 안 팔릴까? 병목은 네이밍도 예산도 아니었다. 진짜 막힌 곳을 찾은 기록.</p>
+        <div class="story-mini"><span class="sm red">병목 35</span><span class="sm green">자산 85</span></div>
+        <span class="story-more">진단 기록 읽기 →</span>
+      </a>
+    </div>
+    <div style="text-align:center;margin-top:40px">
+      <a href="story/" class="btn-primary">마르코 스토리 전체 보기 →</a>
+    </div>
   </div>
 </section>
 <div class="div"></div>
